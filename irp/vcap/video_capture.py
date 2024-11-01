@@ -6,7 +6,7 @@ import cv2
 class VideoCapture:
     def __init__(self, path):
         self.path = path
-        self.vcap = cv2.VideoCapture(path)
+        self.vcap = cv2.VideoCapture(path+"%06d.jpg")
 
     # public function play video
     def play_video(self):
