@@ -11,3 +11,4 @@ python -m irp videos/MOT20/train/MOT20-01/img1/
 ## Dependencies
 * Python 3.12.6
 * OpenCV 4.10.0
+* ultralytics 8.3.31

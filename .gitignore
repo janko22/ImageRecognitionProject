@@ -1,2 +1,6 @@
 .idea/
 videos/
+other/
+output/
+
+yolov8s.pt
