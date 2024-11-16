@@ -56,6 +56,7 @@ class VideoManager:
         if ret:
             for det in dets:
                 cv2.rectangle(frame, (det.x1, det.y1), (det.x2, det.y2), det.colour, 2)
+                cv2.putText(frame, f'{det.class_name} {det.confidence[0]:.2}', (det.x1, det.y1), cv2.FONT_HERSHEY_SIMPLEX, 1, det.colour, 2)
 
             cv2.imshow('Video ' + self.path, frame)
             cv2.namedWindow('Video ' + self.path, cv2.WINDOW_NORMAL)
@@ -63,7 +64,7 @@ class VideoManager:
             cv2.setWindowProperty('Video ' + self.path, cv2.WND_PROP_FULLSCREEN, cv2.WINDOW_FULLSCREEN)
 
     def __detect(self, frame):
-        self.results = self.yolo.track(frame, stream=True, classes=[0])
+        self.results = self.yolo.predict(frame, classes=[0])
         dets = []
 
         for result in self.results:
@@ -92,3 +93,4 @@ class Detection:
         self.class_name = classes_names[self.cls]
 
         self.colour = (255, 0, 0)
+        self.confidence = box.conf
