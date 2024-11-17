@@ -14,26 +14,36 @@ class VideoManager:
 
         if not self.vcap.isOpened():
             print("Error opening video stream or file")
+            return
 
         while True:
-            ret, frame = self.vcap.read()
-            key = cv2.waitKey(1)
-
             if not is_paused:
-                self.__open_video(self.__detect(frame))
+                ret, frame = self.vcap.read()
+                if not ret:
+                    is_paused = True
+                    continue
+                detections = self.__detect(frame)
+                self.__open_video(frame, detections)
 
+            key = cv2.waitKey(1)
             if key == 32:  # Space bar (ASCII Code 32) to pause video
                 is_paused = not is_paused
-            elif key == ord('q'):  # q quit video
+            elif key == ord('q'):  # 'q' to quit video
                 break
-            elif key == 81:  # left arrow to move to past frames
+            elif key in (81, ord('w')):  # Left arrow or 'w' to rewind
                 self.__rewind(-60)
-            elif key == ord('w'):  # w to move to past frames
-                self.__rewind(-60)
-            elif key == 83:  # right arrow to move to future frames
+                if is_paused:  # Jeśli wideo jest w pauzie, pokaż klatkę po przewinięciu
+                    ret, frame = self.vcap.read()
+                    if ret:
+                        detections = self.__detect(frame)
+                        self.__open_video(frame, detections)
+            elif key in (83, ord('e')):  # Right arrow or 'e' to fast forward
                 self.__rewind(60)
-            elif key == ord('e'):  # e to move to future frames
-                self.__rewind(60)
+                if is_paused:  # Jeśli wideo jest w pauzie, pokaż klatkę po przewinięciu
+                    ret, frame = self.vcap.read()
+                    if ret:
+                        detections = self.__detect(frame)
+                        self.__open_video(frame, detections)
 
         self.vcap.release()
         cv2.destroyAllWindows()
@@ -43,23 +53,20 @@ class VideoManager:
         current_frame = self.vcap.get(cv2.CAP_PROP_POS_FRAMES)
         next_frame = max(0, current_frame + frame_count)
         self.vcap.set(cv2.CAP_PROP_POS_FRAMES, next_frame)
-        self.__open_video()
 
     def __get_video_info(self):
         pass
 
     # function to open video window
-    def __open_video(self, dets):
-        ret, frame = self.vcap.read()
-        if ret:
-            for det in dets:
-                cv2.rectangle(frame, (det.x, det.y), (det.w + det.x, det.h + det.y), det.colour, 2)
-                cv2.putText(frame, f'{det.class_name} {det.confidence:.2}', (det.x, det.y), cv2.FONT_HERSHEY_SIMPLEX, 0.75, (0,0,255), 1)
+    def __open_video(self, frame, dets):
+        for det in dets:
+            cv2.rectangle(frame, (det.x, det.y), (det.w + det.x, det.h + det.y), det.colour, 2)
+            cv2.putText(frame, f'{det.class_name} {det.confidence:.2f}',
+                        (det.x, det.y - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 255), 1)
 
-            cv2.imshow('Video ' + self.path, frame)
-            cv2.namedWindow('Video ' + self.path, cv2.WINDOW_NORMAL)
-            # hide toolbar
-            cv2.setWindowProperty('Video ' + self.path, cv2.WND_PROP_FULLSCREEN, cv2.WINDOW_FULLSCREEN)
+        cv2.imshow('Video ' + self.path, frame)
+        cv2.namedWindow('Video ' + self.path, cv2.WINDOW_NORMAL)
+        cv2.setWindowProperty('Video ' + self.path, cv2.WND_PROP_FULLSCREEN, cv2.WINDOW_FULLSCREEN)
 
     def __detect(self, frame):
         humans = []
