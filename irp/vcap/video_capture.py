@@ -1,13 +1,11 @@
 import cv2
-from ultralytics import YOLO
 import numpy as np
 
 # Class Responsible for displaying Video Player with keyboard controls
 class VideoManager:
     def __init__(self, path):
         self.path = path
-        self.yolo = YOLO('yolov8s.pt')
-        #self.net = cv2.dnn.readNetFromTorch('yolov8s.pt')
+        self.net = cv2.dnn.readNet("./yolov3.weights", "./yolov3.cfg")
         self.vcap = cv2.VideoCapture(path+"%06d.jpg")
 
     # public function play video and handle the controls
@@ -55,8 +53,8 @@ class VideoManager:
         ret, frame = self.vcap.read()
         if ret:
             for det in dets:
-                cv2.rectangle(frame, (det.x1, det.y1), (det.x2, det.y2), det.colour, 2)
-                cv2.putText(frame, f'{det.class_name} {det.confidence[0]:.2}', (det.x1, det.y1), cv2.FONT_HERSHEY_SIMPLEX, 1, det.colour, 2)
+                cv2.rectangle(frame, (det.x, det.y), (det.w + det.x, det.h + det.y), det.colour, 2)
+                cv2.putText(frame, f'{det.class_name} {det.confidence:.2}', (det.x, det.y), cv2.FONT_HERSHEY_SIMPLEX, 0.75, (0,0,255), 1)
 
             cv2.imshow('Video ' + self.path, frame)
             cv2.namedWindow('Video ' + self.path, cv2.WINDOW_NORMAL)
@@ -64,33 +62,41 @@ class VideoManager:
             cv2.setWindowProperty('Video ' + self.path, cv2.WND_PROP_FULLSCREEN, cv2.WINDOW_FULLSCREEN)
 
     def __detect(self, frame):
-        self.results = self.yolo.predict(frame, classes=[0])
-        dets = []
+        humans = []
 
-        for result in self.results:
-            classes_names = result.names
+        (height, width) = frame.shape[:2]
 
-            # iterate over each bounding box in results
-            for box in result.boxes:
-                # check if confidence is greater than 40 percent
-                if box.conf[0] > 0.4:
-                    dets.append(Detection(result, box))
+        blob = cv2.dnn.blobFromImage(frame, 1/255.0, (416, 416), swapRB=True, crop=False)
+        self.net.setInput(blob)
 
-        return dets
+        output_layer_name = self.net.getUnconnectedOutLayersNames()
+        output_layers = self.net.forward(output_layer_name)
+
+        for output in output_layers:
+            for detection in output:
+                scores = detection[5:]
+                class_id = np.argmax(scores)
+                confidence = scores[class_id]
+
+                if class_id == 0 and confidence > 0.5:
+                    center_x = int(detection[0] * width)
+                    center_y = int(detection[1] * height)
+
+                    w = int(detection[2] * width)
+                    h = int(detection[3] * height)
+
+                    x = int(center_x - w /2)
+                    y = int(center_y - h /2)
+
+                    humans.append(Detection([x, y, w, h], class_id, confidence))
+
+        return humans
 
 class Detection:
-    def __init__(self, result, box):
+    def __init__(self, coordinates, class_id, confidence):
         # get coordinates
-        [x1, y1, x2, y2] = box.xyxy[0]
-        # convert to int
-        self.x1, self.y1, self.x2, self.y2 = int(x1), int(y1), int(x2), int(y2)
+        self.x, self.y, self.w, self.h = map(int, coordinates)
 
-        # get the class
-        self.cls = int(box.cls[0])
-
-        # get the class name
-        classes_names = result.names
-        self.class_name = classes_names[self.cls]
-
+        self.class_name = "person" if class_id == 0 else "unknown"
         self.colour = (255, 0, 0)
-        self.confidence = box.conf
+        self.confidence = confidence
