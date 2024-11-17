@@ -1,6 +1,9 @@
 import cv2
 import numpy as np
 
+from irp.detection.detection import Detection
+
+
 # Class Responsible for displaying Video Player with keyboard controls
 class VideoManager:
     def __init__(self, path):
@@ -25,21 +28,22 @@ class VideoManager:
                 detections = self.__detect(frame)
                 self.__open_video(frame, detections)
 
+            # controls
             key = cv2.waitKey(1)
-            if key == 32:  # Space bar (ASCII Code 32) to pause video
+            if key == 32:
                 is_paused = not is_paused
-            elif key == ord('q'):  # 'q' to quit video
+            elif key == ord('q'):
                 break
-            elif key in (81, ord('w')):  # Left arrow or 'w' to rewind
+            elif key in (81, ord('w')):
                 self.__rewind(-60)
-                if is_paused:  # Jeśli wideo jest w pauzie, pokaż klatkę po przewinięciu
+                if is_paused:
                     ret, frame = self.vcap.read()
                     if ret:
                         detections = self.__detect(frame)
                         self.__open_video(frame, detections)
-            elif key in (83, ord('e')):  # Right arrow or 'e' to fast forward
+            elif key in (83, ord('e')):
                 self.__rewind(60)
-                if is_paused:  # Jeśli wideo jest w pauzie, pokaż klatkę po przewinięciu
+                if is_paused:
                     ret, frame = self.vcap.read()
                     if ret:
                         detections = self.__detect(frame)
@@ -98,12 +102,3 @@ class VideoManager:
                     humans.append(Detection([x, y, w, h], class_id, confidence))
 
         return humans
-
-class Detection:
-    def __init__(self, coordinates, class_id, confidence):
-        # get coordinates
-        self.x, self.y, self.w, self.h = map(int, coordinates)
-
-        self.class_name = "person" if class_id == 0 else "unknown"
-        self.colour = (255, 0, 0)
-        self.confidence = confidence
