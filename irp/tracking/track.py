@@ -16,3 +16,9 @@ class Track:
 
     def get_coordinates(self):
         return self.x, self.y, self.w, self.h
+
+    def __eq__(self, other):
+        return self.track_id == other.track_id
+
+    def __hash__(self):
+        return hash(self.track_id)

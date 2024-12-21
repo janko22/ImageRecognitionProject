@@ -6,9 +6,10 @@ from irp.detection.detection import Detection
 class ObjectDetector:
     def __init__(self, weights, cfg):
         self.net = cv2.dnn.readNet(weights, cfg)
+        # self.humans = [] # ERROR DETECTIONS ARE NOT DELETED EACH FRAME
 
     def detect_humans(self, frame):
-        humans = []
+        humans = [] # IT WORKED THO
 
         (height, width) = frame.shape[:2]
 
