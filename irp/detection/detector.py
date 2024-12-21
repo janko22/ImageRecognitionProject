@@ -3,7 +3,7 @@ import numpy as np
 
 from irp.detection.detection import Detection
 
-class Detector:
+class ObjectDetector:
     def __init__(self, weights, cfg):
         self.net = cv2.dnn.readNet(weights, cfg)
 

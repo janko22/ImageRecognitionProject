@@ -1,13 +1,16 @@
 import cv2
 
-from irp.detection.detector import Detector
+from irp.detection.detector import ObjectDetector
+from irp.tracking.tracker import ObjectTracker
 
 
 # Class Responsible for displaying Video Player with keyboard controls
 class VideoManager:
     def __init__(self, path):
         self.path = path
-        self.detector = Detector("./yolov3.weights", "./yolov3.cfg")
+        self.detector = ObjectDetector("./yolo/yolov3.weights", "./yolo/yolov3.cfg")
+        self.tracker = ObjectTracker()
+        self.tracks = []
         self.vcap = cv2.VideoCapture(path+"%06d.jpg")
 
     # public function play video and handle the controls
@@ -25,6 +28,7 @@ class VideoManager:
                     is_paused = True
                     continue
                 detections = self.detector.detect_humans(frame)
+                self.tracks = self.tracker.initialize_tracks(detections)
                 self.__open_video(frame, detections)
 
             # controls
@@ -39,6 +43,7 @@ class VideoManager:
                     ret, frame = self.vcap.read()
                     if ret:
                         detections = self.detector.detect_humans(frame)
+                        self.tracks = self.tracker.initialize_tracks(detections)
                         self.__open_video(frame, detections)
             elif key in (83, ord('e')):
                 self.__rewind(60)
@@ -46,6 +51,7 @@ class VideoManager:
                     ret, frame = self.vcap.read()
                     if ret:
                         detections = self.detector.detect_humans(frame)
+                        self.tracks = self.tracker.initialize_tracks(detections)
                         self.__open_video(frame, detections)
 
         self.vcap.release()
@@ -66,6 +72,11 @@ class VideoManager:
             cv2.rectangle(frame, (det.x, det.y), (det.w + det.x, det.h + det.y), det.colour, 2)
             cv2.putText(frame, f'{det.class_name} {det.confidence:.2f}',
                         (det.x, det.y - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 255), 1)
+
+        for track in self.tracks:
+            cv2.circle(frame, (track.center_x, track.center_y), 4, (0, 0, 255), -1)
+            cv2.putText(frame, f'{track.track_id}',
+                        (track.x, track.y - 25), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 255), 1)
 
         cv2.imshow('Video ' + self.path, frame)
         cv2.namedWindow('Video ' + self.path, cv2.WINDOW_NORMAL)
