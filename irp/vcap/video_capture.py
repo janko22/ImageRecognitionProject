@@ -82,11 +82,22 @@ class VideoManager:
         #     cv2.putText(frame, f'{track.track_id}',
         #                 (track.x, track.y - 25), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 255), 1)
 
-        for match in self.matches:
-            cv2.rectangle(frame, (self.matches[match].x, self.matches[match].y), (self.matches[match].w + self.matches[match].x, self.matches[match].h + self.matches[match].y), self.matches[match].colour, 2)
-            cv2.putText(frame, f'{self.matches[match].class_name}:{match.track_id} {self.matches[match].confidence:.2f}',
-                        (self.matches[match].x, self.matches[match].y - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 255), 1)
-            cv2.circle(frame, (match.center_x, match.center_y), 4, (0, 255, 0), -1)
+        # for match in self.matches:
+        #     cv2.rectangle(frame, (self.matches[match].x, self.matches[match].y), (self.matches[match].w + self.matches[match].x, self.matches[match].h + self.matches[match].y), self.matches[match].colour, 2)
+        #     cv2.putText(frame, f'{self.matches[match].class_name}:{match.track_id} {self.matches[match].confidence:.2f}',
+        #                 (self.matches[match].x, self.matches[match].y - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 255), 1)
+        #     cv2.circle(frame, (match.center_x, match.center_y), 4, (0, 255, 0), -1)
+
+        for track, detections in self.matches.items():
+            for detection in detections:
+                cv2.rectangle(frame, (detection.x, detection.y), (
+                detection.w + detection.x, detection.h + detection.y),
+                              detection.colour, 2)
+                cv2.putText(frame,
+                            f'{detection.class_name}:{track.track_id} {detection.confidence:.2f}',
+                            (detection.x, detection.y - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.5,
+                            (0, 0, 255), 1)
+                cv2.circle(frame, (track.center_x, track.center_y), 4, (0, 255, 0), -1)
 
         cv2.imshow('Video ' + self.path, frame)
         cv2.namedWindow('Video ' + self.path, cv2.WINDOW_NORMAL)

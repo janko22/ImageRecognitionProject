@@ -41,9 +41,11 @@ class ObjectTracker:
             for track in self.tracks:
                 if self.mahalanobis_distance((detection.x + detection.w // 2, detection.y + detection.h // 2), (track.center_x, track.center_y)) < 0.5:
                     if track not in self.matches:
-                        self.matches[track] = detection
-                    # elif track in self.matches:
-                    #     self.matches[track].update([detection.x, detection.y, detection.w, detection.h], detection.confidence)
+                        self.matches[track] = []
+                    self.matches[track].append(detection)
+
+        print(f'Detections: {len(detections)}')
+        print(f'Matches: {len(self.matches)}')
 
         return self.matches
 
