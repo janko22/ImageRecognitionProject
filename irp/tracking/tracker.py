@@ -34,23 +34,23 @@ class ObjectTracker:
         pass
 
     def match(self, detections, tracks):
-        matches = dict()
+        matches = {}
 
-        # TODO : FIX DETECTION MATCHING ALL DETECTIONS TO 1 TRACKER :(
+        # TODO : FIX DETECTION MATCHING ALL DETECTIONS TO 1 TRACKER :( - PROBLEM WITH track.__eq__() :(
         for detection in detections:
             for track in tracks:
                 if self.mahalanobis_distance((detection.x + detection.w // 2, detection.y + detection.h // 2), (track.center_x, track.center_y)) < 0.5:
                     if track not in matches:
-                        matches[track] = []
-                    matches[track].append(detection)
+                        matches[track] = detection
 
         print(f'Detections: {len(detections)}')
+        print(f'Tracks: {len(tracks)}')
         print(f'Matches: {len(matches)}')
 
         for track, detections in matches.items():
-            print(f"Track ID: {track.track_id}, Associated Detections: {len(detections)}")
-            for detection in detections:
-                print(f"Detection: {detection.x}, {detection.y}, {detection.w}, {detection.h}")
+            print(f"Track ID: {track.track_id}")
+            # for detection in detections:
+            print(f"Detection: {detection.x}, {detection.y}, {detection.w}, {detection.h}")
 
         return matches
 

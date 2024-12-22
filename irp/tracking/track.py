@@ -18,10 +18,12 @@ class Track:
         return self.x, self.y, self.w, self.h
 
     def __eq__(self, other):
-        return self.track_id == other.track_id
+        if isinstance(other, Track):
+            return id(self) == id(other)
+        return False
 
     def __hash__(self):
-        return hash(self.track_id)
+        return hash(id(self))
 
     def __str__(self):
         return f'Track {self.track_id}'
