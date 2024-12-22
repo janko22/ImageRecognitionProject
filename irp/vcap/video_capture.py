@@ -70,16 +70,6 @@ class VideoManager:
 
     # function to open video window
     def __open_video(self, frame, matches):
-        # for det in dets:
-        #     cv2.rectangle(frame, (det.x, det.y), (det.w + det.x, det.h + det.y), det.colour, 2)
-        #     cv2.putText(frame, f'{det.class_name} {det.confidence:.2f}',
-        #                 (det.x, det.y - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 255), 1)
-
-        # for track in self.tracks:
-        #     cv2.circle(frame, (track.center_x, track.center_y), 4, (0, 0, 255), -1)
-        #     cv2.putText(frame, f'{track.track_id}',
-        #                 (track.x, track.y - 25), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 255), 1)
-
         for match in matches:
             cv2.rectangle(frame, (matches[match].x, matches[match].y), (matches[match].w + matches[match].x, matches[match].h + matches[match].y), matches[match].colour, 2)
             cv2.putText(frame, f'{matches[match].class_name}:{match.track_id} {matches[match].confidence:.2f}',
