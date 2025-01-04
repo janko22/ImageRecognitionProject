@@ -23,7 +23,6 @@ class ObjectTracker:
                     track.update((detection.x, detection.y, detection.w, detection.h))
                     updated_tracks.append(track)
                     matched = True
-                    print(f'matched{track.track_id}')
                     break
 
             if not matched:

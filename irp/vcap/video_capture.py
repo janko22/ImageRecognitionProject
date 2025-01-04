@@ -67,30 +67,14 @@ class VideoManager:
 
     # function to open video window
     def __open_video(self, frame, matches):
-        # for match in matches:
-        #     cv2.rectangle(frame, (matches[match].x, matches[match].y), (matches[match].w + matches[match].x, matches[match].h + matches[match].y), matches[match].colour, 2)
-        #     cv2.putText(frame, f'{matches[match].class_name}:{match.track_id} {matches[match].confidence:.2f}',
-        #                 (matches[match].x, matches[match].y - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 255), 1)
-        #     cv2.circle(frame, (match.center_x, match.center_y), 4, (0, 255, 0), -1)
 
         for match in matches:
             cv2.rectangle(frame,(match.x, match.y),(match.x + match.w, match.y + match.h), (255, 0, 0),2)
             cv2.putText(frame,f'ID:{match.track_id}',(match.x, match.y - 10),cv2.FONT_HERSHEY_SIMPLEX,0.5,(0, 0, 255),1)
             cv2.circle(frame,(match.center_x, match.center_y),4,(0, 255, 0),-1)
 
-            height, width, channels = frame.shape
-            print(f'Szerokość: {width}, Wysokość: {height}, Kanały: {channels}')
-
-        # for track, detections in matches.items():
-        #     for detection in detections:
-        #         cv2.rectangle(frame, (detection.x, detection.y), (
-        #         detection.w + detection.x, detection.h + detection.y),
-        #                       detection.colour, 2)
-        #         cv2.putText(frame,
-        #                     f'{detection.class_name}:{track.track_id} {detection.confidence:.2f}',
-        #                     (detection.x, detection.y - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.5,
-        #                     (0, 0, 255), 1)
-        #         cv2.circle(frame, (track.center_x, track.center_y), 4, (0, 255, 0), -1)
+            # height, width, channels = frame.shape
+            # print(f'Szerokość: {width}, Wysokość: {height}, Kanały: {channels}')
 
         cv2.imshow('Video ' + self.path, frame)
         cv2.namedWindow('Video ' + self.path, cv2.WINDOW_NORMAL)
