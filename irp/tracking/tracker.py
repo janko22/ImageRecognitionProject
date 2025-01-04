@@ -72,3 +72,23 @@ class ObjectTracker:
     def compute_covariance(self, detections, tracks):
         data = np.array(detections + tracks)
         return np.cov(data.T)
+
+    def compute_iou(self, b_box1, b_box2):
+        x1, y1, x2, y2 = b_box1
+        x1_2, y1_2, x2_2, y2_2 = b_box2
+
+        ix1 = max(x1, x1_2)
+        iy1 = max(y1, y1_2)
+        ix2 = max(x1, x2_2)
+        iy2 = max(y1, y2_2)
+
+        intersection_area = max(0, ix2 - ix1) * max(0, iy2 - iy1)
+
+        box1_area = (x2 - x1) * (y2 - y1)
+        box2_area = (x2_2 - x1_2) * (y2_2 - y1_2)
+
+        union_area = box1_area + box2_area - intersection_area
+
+        iou = intersection_area / union_area if union_area != 0 else 0
+
+        return iou
