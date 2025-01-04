@@ -13,30 +13,26 @@ class ObjectTracker:
         self.ttl = ttl
         self.init_frames = init_frames
 
-        # self.cov = np.array([[1, 0.5], [0.5, 2]])
-
     def update(self, detections):
-        updated_tracks = []  # Lista tracków, które zostały dopasowane do detekcji
-
-        # self.cov = self.compute_covariance(detections, self.tracks)
+        updated_tracks = []
 
         for detection in detections:
             matched = False
-            for track in self.tracks:  # Iteracja przez istniejące tracki
-                if self.is_match(detection, track):  # Sprawdź dopasowanie
-                    track.update((detection.x, detection.y, detection.w, detection.h))  # Aktualizacja tracka
+            for track in self.tracks:
+                if self.is_match(detection, track):
+                    track.update((detection.x, detection.y, detection.w, detection.h))
                     updated_tracks.append(track)
                     matched = True
                     print(f'matched{track.track_id}')
                     break
 
             if not matched:
-                # Jeśli brak dopasowania, utwórz nowy track
+                # If not matched create a new track
                 if not matched:
                     self.create_track(detection)
                     updated_tracks.append(self.tracks[-1])
 
-        # Usuń tracki, które nie zostały zaktualizowane (TTL)
+        # Delete tracks with TTL > 0
         self.tracks = [ track for track in self.tracks if track in updated_tracks or track.ttl > 0 ]
 
         return self.tracks
