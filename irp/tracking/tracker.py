@@ -2,10 +2,8 @@ import numpy as np
 
 from irp.tracking.track import Track
 
-# TODO: FIX CONSTANT NEW ID'S / UPDATE DICTIONARY INSTEAD OF INITIALIZING NEW DICTIONARY EVERY FRAME:)
-# TODO: FIX MAHALANOBIS DISTANCE FUNCTION (RESOLUTION SCALING) && COVARIANCE MATRIX
 class ObjectTracker:
-    def __init__(self, max_iou = 0.7, ttl = 3, init_frames = 3):
+    def __init__(self, max_iou = 0.25, ttl = 3, init_frames = 3):
         self.__next_track_id = 0
         self.tracks = []
 
@@ -45,18 +43,25 @@ class ObjectTracker:
         self.__next_track_id += 1
 
     def is_match(self, detection, track):
-        # Check Mahalanobis distance
-        return (
-            self.mahalanobis_distance(
-                (detection.x + detection.w // 2, detection.y + detection.h // 2),
-                (track.center_x, track.center_y)
-            ) < 0.05
+        # Calculate Mahalanobis distance
+        mahalanobis_dist = self.mahalanobis_distance(
+            (detection.x + detection.w // 2, detection.y + detection.h // 2),
+            (track.center_x, track.center_y)
         )
+        if mahalanobis_dist < 0.05:  # Threshold for Mahalanobis distance
+            return True
+
+        # If Mahalanobis distance fails, check IoU
+        detection_bbox = (detection.x, detection.y, detection.x + detection.w, detection.y + detection.h)
+        track_bbox = (track.x, track.y, track.x + track.w, track.y + track.h)
+
+        iou = self.compute_iou(detection_bbox, track_bbox)
+        if iou > self.max_iou:  # Threshold for IoU
+            return True
+
+        return False
 
     def predict(self):
-        pass
-
-    def init_track(self):
         pass
 
     def mahalanobis_distance(self, p1, p2, covariance = np.array([[1, 0.5], [0.5, 2]])):
@@ -74,21 +79,29 @@ class ObjectTracker:
         return np.cov(data.T)
 
     def compute_iou(self, b_box1, b_box2):
+        # Unpack the coordinates of the bounding boxes
         x1, y1, x2, y2 = b_box1
         x1_2, y1_2, x2_2, y2_2 = b_box2
 
+        # Compute the intersection rectangle
         ix1 = max(x1, x1_2)
         iy1 = max(y1, y1_2)
-        ix2 = max(x1, x2_2)
-        iy2 = max(y1, y2_2)
+        ix2 = min(x2, x2_2)  # Correct: take the minimum for bottom-right corner
+        iy2 = min(y2, y2_2)  # Correct: take the minimum for bottom-right corner
 
-        intersection_area = max(0, ix2 - ix1) * max(0, iy2 - iy1)
+        # Calculate intersection area (if it exists)
+        intersection_width = max(0, ix2 - ix1)
+        intersection_height = max(0, iy2 - iy1)
+        intersection_area = intersection_width * intersection_height
 
+        # Calculate areas of both bounding boxes
         box1_area = (x2 - x1) * (y2 - y1)
         box2_area = (x2_2 - x1_2) * (y2_2 - y1_2)
 
+        # Calculate union area
         union_area = box1_area + box2_area - intersection_area
 
+        # Compute IoU
         iou = intersection_area / union_area if union_area != 0 else 0
 
         return iou
