@@ -1,7 +1,7 @@
 # Image Recognition Project
 ## Run
 ```bash
-~/ImageRecognitionProject python -m irp videos/MOT20/train/MOT20-01/img1/
+~/ImageRecognitionProject$ python -m irp <PATH TO IMAGES FOLDER>
 ```
 ## Controls
 * Press <kbd>Space</kbd> to pause/resume video
