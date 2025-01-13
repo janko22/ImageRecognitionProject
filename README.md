@@ -3,6 +3,7 @@
 ```bash
 ~/ImageRecognitionProject$ python -m irp <PATH TO IMAGES FOLDER>
 ```
+Main directory should contain yolo/yolov3.cfg, yolo/yolov8s.pt, yolo/yolov3.weights.
 ## Controls
 * Press <kbd>Space</kbd> to pause/resume video
 * Press <kbd>&larr;</kbd>/<kbd>W</kbd> to move to previous frames
